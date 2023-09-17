@@ -1,10 +1,10 @@
 # My Errors Package
 
-This is a Go package called `github.com/emilien-puget/xerrors` that provides a set of error handling utilities and custom error types.
+This is a Go package called `xerrors` that provides a set of error handling utilities and custom error types.
 
 ## Introduction
 
-The `github.com/emilien-puget/xerrors` package aims to enhance error handling in Go programs by providing custom error types and utility
+The `xerrors` package aims to enhance error handling in Go programs by providing custom error types and utility
 functions for error creation and manipulation. It includes features such as:
 
 - Custom error types
@@ -20,7 +20,7 @@ functions for error creation and manipulation. It includes features such as:
 You can create a new error with a message using the `New` function:
 
 ```go
-err := github.com/emilien-puget/xerrors.New("This is an error message")
+err := xerrors.New("This is an error message")
 ```
 
 ### Chaining Errors
@@ -28,9 +28,9 @@ err := github.com/emilien-puget/xerrors.New("This is an error message")
 You can chain multiple errors together using the `Join` function:
 
 ```go
-err1 := github.com/emilien-puget/xerrors.New("Error 1")
-err2 := github.com/emilien-puget/xerrors.New("Error 2")
-chainedErr := github.com/emilien-puget/xerrors.Join(err1, err2)
+err1 := xerrors.New("Error 1")
+err2 := xerrors.New("Error 2")
+chainedErr := xerrors.Join(err1, err2)
 ```
 
 ### Logging Errors
@@ -45,8 +45,8 @@ To retrieve information about an error, such as its message, stack traces, and a
 function:
 
 ```go
-err := github.com/emilien-puget/xerrors.New("An error occurred")
-info := github.com/emilien-puget/xerrors.Info(err)
+err := xerrors.New("An error occurred")
+info := xerrors.Info(err)
 fmt.Println("Error Message:", info.ErrorChain)
 fmt.Println("Stack Traces:", info.StackTraces)
 fmt.Println("Values:", info.Values)
@@ -57,27 +57,27 @@ fmt.Println("Values:", info.Values)
 You can associate values with errors using the `WithValue` function:
 
 ```go
-valueErr := github.com/emilien-puget/xerrors.WithValue("key", "value")
-chainedErrWithValue := github.com/emilien-puget/xerrors.Join(chainedErr, valueErr)
+valueErr := xerrors.WithValue("key", "value")
+chainedErrWithValue := xerrors.Join(chainedErr, valueErr)
 ```
 
 ### Checking Error Relationships
 
 To check if one error is related to another, you can use functions like Is and As. Please note that Is and As methods
-provided by github.com/emilien-puget/xerrors are purely aliases to the standard library, and their purpose is to ensure that you use this
+provided by xerrors are purely aliases to the standard library, and their purpose is to ensure that you use this
 package's error handling mechanisms instead of the standard library's:
 
 ```go
-err1 := github.com/emilien-puget/xerrors.New("Error 1")
-err2 := github.com/emilien-puget/xerrors.New("Error 2")
-isRelated := github.com/emilien-puget/xerrors.Is(err1, err2)
+err1 := xerrors.New("Error 1")
+err2 := xerrors.New("Error 2")
+isRelated := xerrors.Is(err1, err2)
 ```
 
 aliases to
 
 ## Custom Error Types
 
-The `github.com/emilien-puget/xerrors` package defines several custom error types:
+The `xerrors` package defines several custom error types:
 
 - `errorString`: A basic error type with a message.
 - `joinError`: An error type for chaining multiple errors together.
@@ -90,7 +90,7 @@ Errors can be formatted using the `fmt` package. By default, errors are formatte
 information, you can use the `+` verb for a more detailed representation.
 
 ```go
-err := github.com/emilien-puget/xerrors.New("An error occurred")
+err := xerrors.New("An error occurred")
 fmt.Printf("%+v\n", err) // Detailed error information
 fmt.Printf("%s\n", err) // Basic error message
 ```
