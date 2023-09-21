@@ -1,6 +1,7 @@
-# My Errors Package
+# Xerrors
 
-This is a Go package called `xerrors` that provides a set of error handling utilities and custom error types.
+[![codecov](https://codecov.io/gh/emilien-puget/xerrors/graph/badge.svg?token=kjMuQevvTc)](https://codecov.io/gh/emilien-puget/xerrors)
+[![Test and coverage](https://github.com/emilien-puget/xerrors/actions/workflows/codecov.yml/badge.svg)](https://github.com/emilien-puget/xerrors/actions/workflows/codecov.yml)
 
 ## Introduction
 
