@@ -18,9 +18,13 @@ func Info(err error) ErrorInfo {
 	errors := FlattenErrors(err)
 	for i := range errors {
 		switch et := errors[i].(type) {
-		case *value:
+		case Valuer:
 			key, v := et.Value()
 			values[key] = v
+		case MultiValuer:
+			for s, a := range et.Value() {
+				values[s] = a
+			}
 		case *stack:
 			if errS == nil {
 				errS = et

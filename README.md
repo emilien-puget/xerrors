@@ -15,6 +15,10 @@ functions for error creation and manipulation. It includes features such as:
 
 ## Usage
 
+```go
+import "github.com/emilien-puget/xerrors"
+```
+
 ### Creating New Errors
 
 You can create a new error with a message using the `New` function:
@@ -61,6 +65,31 @@ valueErr := xerrors.WithValue("key", "value")
 chainedErrWithValue := xerrors.Join(chainedErr, valueErr)
 ```
 
+The xerrors package also exposes two interfaces, ``Valuer`` and ``MultiValuer``, that allow you to create your own
+custom error types that can carry associated values.
+
+```go
+package main
+
+type Valuer interface {
+	Value() (key string, value any)
+}
+
+type MultiValuer interface {
+	Value() map[string]any
+}
+```
+
+#### Adding Values for Existing Keys
+
+When using the `Valuer` and `MultiValuer` interfaces to associate values with errors, it's important to note that if a
+key already exists within the error, adding a new value for that key will not replace the existing value.
+Instead, the new value will be associated with the existing key, allowing you to accumulate context information without
+overwriting
+valuable data already associated with the error.
+
+This behavior ensures that each piece of metadata you attach to an error is preserved.
+
 ### Checking Error Relationships
 
 To check if one error is related to another, you can use functions like Is and As. Please note that Is and As methods
@@ -74,15 +103,6 @@ isRelated := xerrors.Is(err1, err2)
 ```
 
 aliases to
-
-## Custom Error Types
-
-The `xerrors` package defines several custom error types:
-
-- `errorString`: A basic error type with a message.
-- `joinError`: An error type for chaining multiple errors together.
-- `stack`: An error type that captures stack traces.
-- `value`: An error type for associating values with errors.
 
 ## Formatting Errors
 

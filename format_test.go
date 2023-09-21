@@ -11,7 +11,7 @@ import (
 func TestFormat(t *testing.T) {
 	err := New("error")
 	err = Join(err, "its a wrap")
-	err = Join(err, "its another wrap", "with something more", WithValue("toto", "key1"))
+	err = Join(err, "its another wrap", "with something more", WithValue("toto", "key1"), WithValues(map[string]any{"toto": "key1", "foo": 404}))
 	for _, tc := range []struct {
 		ft       string
 		expected string
@@ -22,7 +22,7 @@ func TestFormat(t *testing.T) {
 		},
 		{
 			ft:       "%+v",
-			expected: "error\nstack\n\tgithub.com/emilien-puget/xerrors.TestFormat ([^ ]+)format_test.go:12\n\ttesting.tRunner ([^ ]+)testing.go:1595\n\truntime.goexit ([^ ]+)asm_amd64.s:1650\n: \tits a wrap: \tits another wrap\n\twith something more\n\tvalue: toto \"key1\"",
+			expected: "^error\nstack\n\tgithub.com/emilien-puget/xerrors.TestFormat ([^ ]+)format_test.go:12\n\ttesting.tRunner ([^ ]+)testing.go:1595\n\truntime.goexit ([^ ]+)asm_amd64.s:1650\n: \tits a wrap: \tits another wrap\n\twith something more\n\tvalue: toto \"key1\"\n\tvalues: \\[toto: \"key1\" foo: \"404\"\\]$",
 		},
 		{
 			ft:       "%s",
