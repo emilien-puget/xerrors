@@ -7,9 +7,11 @@ import (
 	"strings"
 )
 
-type StackFramess []uintptr
+// Frames is a slice of uintptrs representing stack frames.
+type Frames []uintptr
 
-func (s StackFramess) Frames() []Frame {
+// Frames returns the list of Frame objects associated with the Frames.
+func (s Frames) Frames() []Frame {
 	r := make([]Frame, len(s))
 	f := runtime.CallersFrames(s)
 	n := 0
@@ -27,12 +29,14 @@ func (s StackFramess) Frames() []Frame {
 	return r
 }
 
+// Frame represents a single stack frame with file, line, and function information.
 type Frame struct {
 	File     string
 	Line     int
 	Function string
 }
 
+// String returns a string representation of the Frame.
 func (s Frame) String() string {
 	builder := bufferPool.Get().(*strings.Builder)
 	builder.Reset()
@@ -44,7 +48,7 @@ func (s Frame) String() string {
 
 type stack struct {
 	err     error
-	callers StackFramess
+	callers Frames
 }
 
 func (err *stack) Error() string {
@@ -80,7 +84,7 @@ func (err *stack) Unwrap() error {
 	return err.err
 }
 
-func (err *stack) StackFrames() StackFramess {
+func (err *stack) StackFrames() Frames {
 	return err.callers
 }
 
@@ -90,9 +94,9 @@ func (err *stack) Format(s fmt.State, verb rune) {
 	format(err, s, verb)
 }
 
-// StackFrames returns the list of *StackFramess associated to an error.
-func StackFrames(err error) *StackFramess {
-	var fss *StackFramess
+// StackFrames returns the list of *Frames associated to an error.
+func StackFrames(err error) *Frames {
+	var fss *Frames
 	for ; err != nil; err = errors.Unwrap(err) {
 		var errS *stack
 		ok := errors.As(err, &errS)
@@ -105,7 +109,7 @@ func StackFrames(err error) *StackFramess {
 	return fss
 }
 
-func callers(skip int) StackFramess {
+func callers(skip int) Frames {
 	pc := make([]uintptr, 32)
 	n := runtime.Callers(skip+1, pc)
 	return pc[:n]

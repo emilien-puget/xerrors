@@ -1,5 +1,6 @@
 package xerrors
 
+// ErrorInfo contains information about the error chain, stack traces, and values associated with an error.
 type ErrorInfo struct {
 	ErrorChain  string
 	StackTraces []string
@@ -52,6 +53,7 @@ func Info(err error) ErrorInfo {
 	}
 }
 
+// FlattenErrors recursively flattens nested errors into a slice of individual errors.
 func FlattenErrors(err error) []error {
 	flatErrors := make([]error, 0)
 
