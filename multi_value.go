@@ -42,13 +42,11 @@ func (err *multiValue) message(verbose bool) string {
 	if !verbose {
 		return ""
 	}
-	var keyValuePairs []string
+	keyValuePairs := make([]string, 0, len(err.values))
 
 	for key, v := range err.values {
-		// Format the key-value pair and add it to the slice.
 		keyValuePairs = append(keyValuePairs, fmt.Sprintf("%s: \"%v\"", key, v))
 	}
 
-	// Join the key-value pairs into a single string, separated by spaces.
 	return "values: [" + strings.Join(keyValuePairs, " ") + "]"
 }
