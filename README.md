@@ -103,8 +103,6 @@ err2 := xerrors.New("Error 2")
 isRelated := xerrors.Is(err1, err2)
 ```
 
-aliases to
-
 ## Formatting Errors
 
 Errors can be formatted using the `fmt` package. By default, errors are formatted as strings. To include additional
