@@ -8,8 +8,8 @@ import (
 
 func TestValue(t *testing.T) {
 	err := New("error")
-	err = Join(err, WithValue("foo", "bar"))
-	err = Join(err, "wrapped")
+	err = JoinStack(err, WithValue("foo", "bar"))
+	err = JoinStack(err, "wrapped")
 	vals := Values(err)
 	expected := map[string]interface{}{
 		"foo": "bar",
@@ -19,8 +19,8 @@ func TestValue(t *testing.T) {
 
 func TestValueOverWrite(t *testing.T) {
 	err := New("error")
-	err = Join(err, WithValue("test", 1), WithValue("test", 2))
-	err = Join(err, "wrapped")
+	err = JoinStack(err, WithValue("test", 1), WithValue("test", 2))
+	err = JoinStack(err, "wrapped")
 	vals := Values(err)
 	expected := map[string]interface{}{
 		"test": 1,

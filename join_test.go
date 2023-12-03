@@ -14,48 +14,43 @@ import (
 var errmy = errors.New("plouf")
 
 func TestJoin(t *testing.T) {
-	newErr := Join(errmy, "i'm wrapped", errors.New("bla"))
+	newErr := JoinStack(errmy, "i'm wrapped", errors.New("bla"))
 
 	assert.ErrorIs(t, newErr, errmy)
 
 	var joinErr *joinError
 	errors.As(newErr, &joinErr)
 
-	assert.ErrorIs(t, joinErr.err, errmy)
-	assert.Len(t, joinErr.errs, 2)
+	assert.ErrorIs(t, newErr, errmy)
+	assert.Len(t, joinErr.errs, 4)
 }
 
 func TestJoinError_Error(t *testing.T) {
 	err1 := New("err1")
 	err2 := New("err2")
 	for name, test := range map[string]struct {
-		err  error
 		errs []any
 		want string
 	}{
 		"empty": {
-			err:  err1,
-			errs: []any{},
+			errs: []any{err1},
 			want: "err1",
 		},
 		"err_ele": {
-			err:  err1,
-			errs: []any{err2, "a_string"},
+			errs: []any{err1, err2, "a_string"},
 			want: "err1: err2 + a_string",
 		},
 		"nil_elem": {
-			err:  err1,
-			errs: []any{nil, err2},
+			errs: []any{err1, nil, err2},
 			want: "err1: err2",
 		},
 		"sub_join": {
-			err:  err1,
-			errs: []any{Join(err2, "sub")},
+			errs: []any{err1, JoinStack(err2, "sub")},
 			want: "err1: err2: sub",
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			got := Join(test.err, test.errs...).Error()
+			got := JoinStack(test.errs...).Error()
 			assert.Equal(t, test.want, got)
 		})
 	}
@@ -65,7 +60,6 @@ func TestJoinError_LogValueMethod(t *testing.T) {
 	err1 := New("err1")
 	err2 := New("err2")
 	for name, test := range map[string]struct {
-		err             error
 		errs            []any
 		wantMessage     string
 		wantStack       string
@@ -73,8 +67,7 @@ func TestJoinError_LogValueMethod(t *testing.T) {
 		wantValues      map[string]any
 	}{
 		"empty": {
-			err:         err1,
-			errs:        []any{},
+			errs:        []any{err1},
 			wantMessage: "err1",
 			wantStack: `github.com/emilien-puget/xerrors.TestJoinError_LogValueMethod join_test.go:66
 testing.tRunner testing.go:1595
@@ -83,8 +76,7 @@ runtime.goexit asm_amd64.s:1650`,
 			wantValues:      map[string]any{},
 		},
 		"err_ele": {
-			err:         err1,
-			errs:        []any{err2, "a_string"},
+			errs:        []any{err1, err2, "a_string"},
 			wantMessage: "err1: err2 + a_string",
 			wantStack: `github.com/emilien-puget/xerrors.TestJoinError_LogValueMethod join_test.go:66
 testing.tRunner testing.go:1595
@@ -93,8 +85,7 @@ runtime.goexit asm_amd64.s:1650`,
 			wantValues:      map[string]any{},
 		},
 		"nil_elem": {
-			err:         err1,
-			errs:        []any{nil, err2},
+			errs:        []any{err1, nil, err2},
 			wantMessage: "err1: err2",
 			wantStack: `github.com/emilien-puget/xerrors.TestJoinError_LogValueMethod join_test.go:66
 testing.tRunner testing.go:1595
@@ -103,8 +94,7 @@ runtime.goexit asm_amd64.s:1650`,
 			wantValues:      map[string]any{},
 		},
 		"sub_join": {
-			err:         err1,
-			errs:        []any{Join(err2, "sub")},
+			errs:        []any{err1, JoinStack(err2, "sub")},
 			wantMessage: "err1: err2: sub",
 			wantStack: `github.com/emilien-puget/xerrors.TestJoinError_LogValueMethod join_test.go:66
 testing.tRunner testing.go:1595
@@ -113,8 +103,7 @@ runtime.goexit asm_amd64.s:1650`,
 			wantValues:      map[string]any{},
 		},
 		"values": {
-			err:         err1,
-			errs:        []any{nil, err2, WithValue("one", "two")},
+			errs:        []any{err1, nil, err2, WithValue("one", "two")},
 			wantMessage: "err1: err2",
 			wantStack: `github.com/emilien-puget/xerrors.TestJoinError_LogValueMethod join_test.go:66
 testing.tRunner testing.go:1595
@@ -124,7 +113,7 @@ runtime.goexit asm_amd64.s:1650`,
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			newErr := Join(test.err, test.errs...)
+			newErr := JoinStack(test.errs...)
 			var buf bytes.Buffer
 			h := slog.NewJSONHandler(&buf, nil)
 			logger := slog.New(h)

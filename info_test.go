@@ -8,8 +8,8 @@ import (
 
 func TestInfo(t *testing.T) {
 	err := New("plouf")
-	err = Join(err, "its a wrap")
-	err = Join(err, WithValue("key1", "value1"), WithValue("key2", "value2"), "An error occurred")
+	err = JoinStack(err, "its a wrap")
+	err = JoinStack(err, WithValue("key1", "value1"), WithValue("key2", "value2"), "An error occurred")
 
 	info := Info(err)
 	assert.Equal(t, "plouf: its a wrap: An error occurred", info.ErrorChain)
@@ -21,7 +21,7 @@ func createErrorGraph(depth int) error {
 	if depth <= 0 {
 		return New("base error")
 	}
-	return Join(createErrorGraph(depth-1), "error message", WithValue("toto", 3))
+	return JoinStack(createErrorGraph(depth-1), "error message", WithValue("toto", 3))
 }
 
 func BenchmarkInfo(b *testing.B) {

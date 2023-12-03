@@ -6,18 +6,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStack(t *testing.T) {
-	err := New("error")
+func TestStack_JoinStack(t *testing.T) {
+	err := JoinStack(New("error"))
 	sfs := StackFrames(err)
 
 	frames := sfs.Frames()
 	assert.Len(t, frames, 3)
-	assert.Equal(t, frames[0].Function, "github.com/emilien-puget/xerrors.TestStack")
-	assert.Equal(t, frames[1].Function, "testing.tRunner")
-	assert.Equal(t, frames[2].Function, "runtime.goexit")
+	assert.Equal(t, "github.com/emilien-puget/xerrors.TestStack_JoinStack", frames[0].Function)
+	assert.Equal(t, "testing.tRunner", frames[1].Function)
+	assert.Equal(t, "runtime.goexit", frames[2].Function)
 }
 
-func TestStackNil(t *testing.T) {
-	err := withStack(nil, 0)
-	assert.NoError(t, err)
+func TestStack_Join(t *testing.T) {
+	err := Join(New("error"), WithStack())
+	sfs := StackFrames(err)
+
+	frames := sfs.Frames()
+	assert.Len(t, frames, 3)
+	assert.Equal(t, "github.com/emilien-puget/xerrors.TestStack_Join", frames[0].Function)
+	assert.Equal(t, "testing.tRunner", frames[1].Function)
+	assert.Equal(t, "runtime.goexit", frames[2].Function)
 }

@@ -19,7 +19,6 @@ func (e *errorString) Error() string {
 // New returns a newErrorString error with a message and a stack.
 func New(msg string) error {
 	err := newErrorString(msg)
-	err = withStack(err, 2)
 	return err
 }
 

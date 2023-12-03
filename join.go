@@ -14,7 +14,6 @@ var bufferPool = sync.Pool{
 }
 
 type joinError struct {
-	err  error
 	errs []error
 }
 
@@ -41,19 +40,18 @@ func (err *joinError) message(verbose bool) string {
 		return err.fmt("%s", "%s", ": ", " + ")
 	}
 
-	return err.fmt("%+v", "\t%+v", ": ", "\n")
+	return err.fmt("%+v", "%+v", ": ", "\n")
 }
 
 func (err *joinError) fmt(mainErrFmt, secErrFmt, mainErrSep, secErrSep string) string {
-	mainErrStr := fmt.Sprintf(mainErrFmt, err.err)
-
+	mainErrStr := fmt.Sprintf(mainErrFmt, err.errs[0])
 	builder := bufferPool.Get().(*strings.Builder)
 	builder.Reset()
 	builder.WriteString(mainErrStr)
-
 	var hasErrors bool
-	for i := range err.errs {
-		s := fmt.Sprintf(secErrFmt, err.errs[i])
+	errors := err.errs[1:]
+	for i := range errors {
+		s := fmt.Sprintf(secErrFmt, errors[i])
 		if s != "" {
 			if hasErrors {
 				builder.WriteString(secErrSep)
@@ -80,15 +78,15 @@ func (err *joinError) Unwrap() []error {
 	n := 1 + len(err.errs) // Length of the resulting slice
 	i := make([]error, 0, n)
 
-	i = append(i, err.err)
 	i = append(i, err.errs...)
 
 	return i
 }
 
-// Join creates a new error that represents an error chain by joining the original error
+// JoinStack creates a new error that represents an error chain by joining the original error
 // with a list of additional errors.
-func Join(ogErr error, errs ...any) error {
+// a stack is added if one is not already present in the error chain.
+func JoinStack(errs ...any) error {
 	n := 0
 	for _, err := range errs {
 		switch err.(type) {
@@ -99,9 +97,44 @@ func Join(ogErr error, errs ...any) error {
 		}
 	}
 
-	stackedErr := ensureStack(ogErr, 2)
 	e := &joinError{
-		err:  stackedErr,
+		errs: make([]error, 0, n),
+	}
+	var stacked bool
+	for i := 0; i < len(errs); i++ {
+		switch s := errs[i].(type) {
+		case string:
+			e.errs = append(e.errs, newErrorString(s))
+		case error:
+			if s != nil {
+				e.errs = append(e.errs, s)
+				b := hasStack(s)
+				if b {
+					stacked = true
+				}
+			}
+		}
+	}
+	if !stacked {
+		e.errs = append(e.errs, WithStackSkip(2))
+	}
+	return e
+}
+
+// Join creates a new error that represents an error chain by joining the original error
+// with a list of additional errors.
+func Join(errs ...any) error {
+	n := 0
+	for _, err := range errs {
+		switch err.(type) {
+		case string:
+			n++
+		case error:
+			n++
+		}
+	}
+
+	e := &joinError{
 		errs: make([]error, 0, n),
 	}
 

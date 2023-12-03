@@ -47,7 +47,6 @@ func (s Frame) String() string {
 }
 
 type stack struct {
-	err     error
 	callers Frames
 }
 
@@ -70,7 +69,7 @@ func (err *stack) message(verbose bool) string {
 		builder.WriteString("\t" + fr.String() + "\n")
 	}
 
-	return "\n" + builder.String()
+	return builder.String()
 }
 
 // Is implements the anonymous interface Is
@@ -78,10 +77,6 @@ func (err *stack) message(verbose bool) string {
 func (err *stack) Is(target error) bool {
 	_, ok := target.(*stack)
 	return ok
-}
-
-func (err *stack) Unwrap() error {
-	return err.err
 }
 
 func (err *stack) StackFrames() Frames {
@@ -115,9 +110,13 @@ func callers(skip int) Frames {
 	return pc[:n]
 }
 
-func ensureStack(err error, skip int) error {
+func EnsureStack(err error) error {
+	return EnsureStackSkip(err, 1)
+}
+
+func EnsureStackSkip(err error, skip int) error {
 	if !hasStack(err) {
-		err = withStack(err, skip+1)
+		return Join(err, WithStackSkip(skip+1))
 	}
 	return err
 }
@@ -126,12 +125,12 @@ func hasStack(err error) bool {
 	return Is(err, &stack{})
 }
 
-func withStack(err error, skip int) error {
-	if err == nil {
-		return nil
-	}
+func WithStackSkip(skip int) error {
 	return &stack{
-		err:     err,
 		callers: callers(skip + 1),
 	}
+}
+
+func WithStack() error {
+	return WithStackSkip(2)
 }
